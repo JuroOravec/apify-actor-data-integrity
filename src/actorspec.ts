@@ -31,8 +31,8 @@ const actorSpec = {
   websites: [],
   pricing: {
     pricingType: 'monthly fee',
-    value: 0,
-    currency: 'eur',
+    value: 5,
+    currency: 'usd',
     period: 1,
     periodUnit: 'month',
   },
