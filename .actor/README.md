@@ -150,7 +150,7 @@ Once the actor is done, you can see the overview of results in the Output tab.
 
 To export the data, head over to the Storage tab.
 
-![SKCRIS Scraper dataset overview](/public/imgs/skcris-actor-dataset-overview.png)
+![Data Change Monitoring actor dataset overview](/public/imgs/data-integrity-actor-dataset-overview.png)
 
 
 ## Sample output from Data Change Monitoring

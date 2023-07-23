@@ -261,12 +261,12 @@ export const runDataIntegrityCheck = async <
   // 2. Get cached items that we'll use for comparison
   log.info(`Downloading reference dataset`);
   const cachedItems = await downloadDataset(comparisonDatasetIdOrName, { Actor: ActorUtils });
-  log.info(`Done downloading reference dataset`);
+  log.info(`Done downloading reference dataset - Found ${cachedItems.length} entries`);
 
   // 3. Get scraped items
   log.info(`Downloading tested dataset`);
   const scrapedItems = await downloadDataset(scrapedDatasetId, { Actor: ActorUtils });
-  log.info(`Done downloading tested dataset`);
+  log.info(`Done downloading tested dataset - Found ${scrapedItems.length} entries`);
 
   // 4. Identify fields that changed for the items that are present in both reference and test datasets
   log.info(`Comparing datasets`);
@@ -283,7 +283,7 @@ export const runDataIntegrityCheck = async <
     ...d,
     itemKeys: fromPairs(comparisonDatasetPrimaryKeys?.map((key) => [key, d.itemValueTested[key]])),
   })) satisfies FieldMismatch[];
-  log.info(`Found ${mismatchFields.length} discrepancies`);
+  log.info(`Done comparing datasets - Found ${mismatchFields.length} discrepancies`);
 
   // 5. Push errors as this actor's dataset
   await actor.pushData(enrichedMismatchFields, { log } as any, {

@@ -9,7 +9,7 @@ const actorSpec = {
     title: 'Data Change Monitoring',
     publicUrl: `https://apify.com/${authorId}/${actorId}`,
     shortDesc: 'Apify Actor that monitors data change (data integrity) of other actors or datasets',
-    datasetOverviewImgUrl: '/public/imgs/skcris-actor-dataset-overview.png',
+    datasetOverviewImgUrl: '/public/imgs/data-integrity-actor-dataset-overview.png',
   },
   platform: {
     name: 'apify',
