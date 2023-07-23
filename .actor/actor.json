@@ -216,7 +216,7 @@
       "outputCachePrimaryKeys": {
         "title": "Cache primary keys",
         "type": "array",
-        "description": "Specify fields that uniquely identify entries (primary keys), so entries can be compared against the cache.<br/><br/>\n    <strong>NOTE:<strong> If not set, the entries are hashed based all fields",
+        "description": "Specify fields that uniquely identify entries (primary keys), so entries can be compared against the cache.<br/><br/>\n    <strong>NOTE:<strong> If not set, the entries are hashed based on all fields",
         "editor": "stringList",
         "example": [
           "name",
