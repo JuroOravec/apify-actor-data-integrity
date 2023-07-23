@@ -14,6 +14,8 @@ import {
 
 import type { ActorInput } from '../config';
 
+type ActorClass = Pick<typeof Actor, 'openDataset' | 'openKeyValueStore' | 'callTask' | 'call'>;
+
 interface FieldReport {
   /** Field name */
   fieldName: string;
@@ -44,7 +46,8 @@ interface ItemReport {
   valueTested: any;
 }
 
-interface FieldMismatch {
+/** Dataset entry that describes data integrity errors */
+export interface FieldMismatch {
   itemCacheId: ItemReport['cacheId'];
   itemKeys: ItemReport['keys'];
   itemTypeMismatch: ItemReport['matchType'];
@@ -62,8 +65,15 @@ const log = {
   debug: console.debug,
 };
 
-const downloadDataset = async (datasetId: string) => {
-  const dataset = await Actor.openDataset(datasetId);
+const downloadDataset = async (
+  datasetId: string,
+  options?: {
+    /** Apify's Actor static class passed as argument to allow overwriting in unit tests */
+    Actor?: ActorClass;
+  }
+) => {
+  const ActorClass = options?.Actor ?? Actor;
+  const dataset = await ActorClass.openDataset(datasetId);
   const allItems = (await dataset.getData()).items;
   return allItems;
 };
@@ -186,18 +196,24 @@ const analyzeDataIntegrity = (input: {
 
   return {
     mismatchFields,
-    referenceItemsFound,
-    referenceItemsNotFound,
+    referenceItemsFound: referenceItemsFound.map((d) => d.item),
+    referenceItemsNotFound: referenceItemsNotFound.map((d) => d.item),
     testItemsFound,
     testItemsNotFound,
   };
 };
 
 export const runDataIntegrityCheck = async <
-  T extends ActorContext<BasicCrawlingContext<any>, any, ActorInput>
+  T extends Pick<ActorContext<BasicCrawlingContext<any>, any, ActorInput>, 'input' | 'pushData'>
 >(
-  actor: T
+  actor: T,
+  options?: {
+    /** Apify's Actor static class passed as argument to allow overwriting in unit tests */
+    Actor?: ActorClass;
+  }
 ) => {
+  const ActorUtils = options?.Actor ?? Actor;
+
   const {
     runType = 'ACTOR',
     actorOrTaskId,
@@ -223,7 +239,7 @@ export const runDataIntegrityCheck = async <
   // 1. Call target actor with inputs & wait for results
   let actorRunDatasetId: string | null = null;
   if (actorOrTaskId) {
-    const actorRunner = runType === 'TASK' ? Actor.callTask : Actor.call;
+    const actorRunner = runType === 'TASK' ? ActorUtils.callTask : ActorUtils.call;
     const actorRun = await actorRunner(actorOrTaskId, actorOrTaskInput, { build: actorOrTaskBuild }); // prettier-ignore
     actorRunDatasetId = actorRun.defaultDatasetId;
 
@@ -238,9 +254,9 @@ export const runDataIntegrityCheck = async <
   }
 
   // 2. Get scraped items
-  const scrapedItems = await downloadDataset(scrapedDatasetId);
+  const scrapedItems = await downloadDataset(scrapedDatasetId, { Actor: ActorUtils });
   // 3. Get cached items that we'll use for comparison
-  const cachedItems = await downloadDataset(comparisonDatasetIdOrName);
+  const cachedItems = await downloadDataset(comparisonDatasetIdOrName, { Actor: ActorUtils });
 
   // 4. Identify fields that changed for the items that are present in both reference and test datasets
   const { mismatchFields, referenceItemsFound, referenceItemsNotFound, testItemsNotFound } =
@@ -264,11 +280,11 @@ export const runDataIntegrityCheck = async <
   });
 
   // 6. Prepare summary stats
-  const referenceItemsFail = uniqBy(enrichedMismatchFields, (item) => item.itemCacheId);
+  const referenceItemsFail = uniqBy(enrichedMismatchFields, (item) => item.itemCacheId).length;
   const stats = {
     referenceItemsFound: referenceItemsFound.length,
     referenceItemsNotFound: referenceItemsNotFound.length,
-    referenceItemsSuccess: referenceItemsFound.length - referenceItemsFail.length,
+    referenceItemsSuccess: referenceItemsFound.length - referenceItemsFail,
     referenceItemsFail,
   };
 
@@ -276,7 +292,7 @@ export const runDataIntegrityCheck = async <
   console.log(`STATS:\n${JSON.stringify(stats, null, 2)}`);
 
   // 8. Push stats to key-value store
-  const kvStore = await Actor.openKeyValueStore();
+  const kvStore = await ActorUtils.openKeyValueStore();
   await kvStore.setValue('DATA_INTEGRITY_STATS', stats);
 
   // 9. Replace stale cache entries with entries that were found in the scraper run
@@ -287,7 +303,7 @@ export const runDataIntegrityCheck = async <
 
     // NOTE: Not sure if we need to call `Actor.openDataset()` both times, but since we call
     // `Dataset.drop()` I imagine that the dataset instance may become stale after that.
-    await (await Actor.openDataset(comparisonDatasetIdOrName)).drop();
-    await (await Actor.openDataset(comparisonDatasetIdOrName)).pushData(finalCacheItems);
+    await (await ActorUtils.openDataset(comparisonDatasetIdOrName)).drop();
+    await (await ActorUtils.openDataset(comparisonDatasetIdOrName)).pushData(finalCacheItems);
   }
 };
