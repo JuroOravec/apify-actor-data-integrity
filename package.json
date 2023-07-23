@@ -43,7 +43,6 @@
     "unmigrate": "npx apify-actor-utils unmigrate -d ./dist/cjs/actor-migrations/migrations",
     "gen:actor": "npx apify-actor-config gen -c ./dist/cjs/config.js",
     "gen:actorspec": "npx actor-spec gen -c ./dist/cjs/actorspec.js",
-    "gen:readme": "ts-node ./src/readme.ts",
     "test": "vitest run",
     "coverage": "vitest run --coverage"
   },

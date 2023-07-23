@@ -11,7 +11,12 @@ import {
   createActorOutputSchema,
   createObjectField,
 } from 'apify-actor-config';
-import { OutputActorInput, outputInput } from 'apify-actor-utils';
+import {
+  MetamorphActorInput,
+  OutputActorInput,
+  metamorphInput,
+  outputInput,
+} from 'apify-actor-utils';
 
 import actorSpec from './actorspec';
 import { RUN_TYPE, RunType } from './types';
@@ -100,6 +105,7 @@ export interface CustomActorInput {
 export interface ActorInput
   // Include the common fields in input
   extends OutputActorInput,
+    MetamorphActorInput,
     CustomActorInput {}
 
 const datasetIdPattern = '^[a-zA-Z0-9][a-zA-Z0-9-]*$';
@@ -223,6 +229,7 @@ const inputSchema = createActorInputSchema<ActorInputSchema<Record<keyof ActorIn
     ...customActorInput,
     // Include the common fields in input
     ...outputInput,
+    ...metamorphInput,
   },
 });
 

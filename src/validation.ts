@@ -1,11 +1,12 @@
 import Joi from 'joi';
-import { outputInputValidationFields } from 'apify-actor-utils';
+import { metamorphInputValidationFields, outputInputValidationFields } from 'apify-actor-utils';
 
 import { RUN_TYPE } from './types';
 import type { ActorInput } from './config';
 
 const inputValidationSchema = Joi.object<ActorInput>({
   ...outputInputValidationFields,
+  ...metamorphInputValidationFields,
 
   runType: Joi.string().valid(...RUN_TYPE).required(), // prettier-ignore
   actorOrTaskId: Joi.string().min(1).optional(),
