@@ -126,7 +126,9 @@ const customActorInput: Record<keyof CustomActorInput, Field> = {
   actorOrTaskId: createStringField({
     title: 'Actor or Task ID',
     type: 'string',
-    description: `Actor or task to call. Allowed formats are \`username/actor-name\`, \`userId/actor-name\` or actor ID.`,
+    description: `Actor or task to call. Allowed formats are \`username/actor-name\`, \`userId/actor-name\` or actor ID.${newLine(2)}
+    Can be omitted if you already have an existing Dataset and you don't need to run an Acor to generate the Dataset.${newLine(2)}
+    Either \`actorOrTaskId\` or \`actorOrTaskDatasetIdOrName\` MUST be given.`,
     editor: 'textfield',
     example: 'username/actor-name',
     nullable: true,
@@ -151,9 +153,11 @@ const customActorInput: Record<keyof CustomActorInput, Field> = {
   actorOrTaskDatasetIdOrName: createStringField({
     title: 'Actor or Task output Dataset ID',
     type: 'string',
-    description: `ID or name of the dataset that stores entries scraped by the given actor or task.
-    <a href="https://docs.apify.com/sdk/python/docs/concepts/storages#opening-named-and-unnamed-storages">Learn more</a><br/><br/>
-    <strong>NOTE:<strong> Dataset name can only contain letters 'a' through 'z', the digits '0' through '9', and the hyphen ('-') but only in the middle of the string (e.g. 'my-value-1')`,
+    description: `ID or name of the dataset that stores entries scraped by the given actor or task.${newLine(2)}
+    Either \`actorOrTaskId\` or \`actorOrTaskDatasetIdOrName\` MUST be given.${newLine(2)}
+    Default: Run's default dataset.${newLine(2)}
+    <strong>NOTE:<strong> Dataset name can only contain letters 'a' through 'z', the digits '0' through '9', and the hyphen ('-') but only in the middle of the string (e.g. 'my-value-1').
+    <a href="https://docs.apify.com/sdk/python/docs/concepts/storages#opening-named-and-unnamed-storages">Learn more</a>`, // prettier-ignore
     editor: 'textfield',
     example: 'mIJVZsRQrDQf4rUAf',
     pattern: datasetIdPattern,
