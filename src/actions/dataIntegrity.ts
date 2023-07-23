@@ -239,13 +239,18 @@ export const runDataIntegrityCheck = async <
   // 1. Call target actor with inputs & wait for results
   let actorRunDatasetId: string | null = null;
   if (actorOrTaskId) {
+    log.info(`Calling ${runType} to generate dataset for comparison`);
+    log.info({ actorOrTaskId, actorOrTaskInput, actorOrTaskBuild });
     const actorRunner = runType === 'TASK' ? ActorUtils.callTask : ActorUtils.call;
     const actorRun = await actorRunner(actorOrTaskId, actorOrTaskInput, { build: actorOrTaskBuild }); // prettier-ignore
     actorRunDatasetId = actorRun.defaultDatasetId;
+    log.info(`Done calling ${runType} to generate dataset for comparison`);
 
     if (actorRun.status !== 'SUCCEEDED') {
       throw Error(`Actor run did not succeed. ${actorRun.status}: ${actorRun.statusMessage}`);
     }
+  } else {
+    log.info(`Using existing dataset for comparison. Skipping calling actor or task to generate a dataset.`); // prettier-ignore
   }
 
   const scrapedDatasetId = actorOrTaskDatasetIdOrName || actorRunDatasetId;
@@ -253,12 +258,18 @@ export const runDataIntegrityCheck = async <
     throw Error("Cannot obtain actor dataset. Make sure the actor's dataset exists.");
   }
 
-  // 2. Get scraped items
-  const scrapedItems = await downloadDataset(scrapedDatasetId, { Actor: ActorUtils });
-  // 3. Get cached items that we'll use for comparison
+  // 2. Get cached items that we'll use for comparison
+  log.info(`Downloading reference dataset`);
   const cachedItems = await downloadDataset(comparisonDatasetIdOrName, { Actor: ActorUtils });
+  log.info(`Done downloading reference dataset`);
+
+  // 3. Get scraped items
+  log.info(`Downloading tested dataset`);
+  const scrapedItems = await downloadDataset(scrapedDatasetId, { Actor: ActorUtils });
+  log.info(`Done downloading tested dataset`);
 
   // 4. Identify fields that changed for the items that are present in both reference and test datasets
+  log.info(`Comparing datasets`);
   const { mismatchFields, referenceItemsFound, referenceItemsNotFound, testItemsNotFound } =
     analyzeDataIntegrity({
       testItems: scrapedItems,
@@ -272,6 +283,7 @@ export const runDataIntegrityCheck = async <
     ...d,
     itemKeys: fromPairs(comparisonDatasetPrimaryKeys?.map((key) => [key, d.itemValueTested[key]])),
   })) satisfies FieldMismatch[];
+  log.info(`Found ${mismatchFields.length} discrepancies`);
 
   // 5. Push errors as this actor's dataset
   await actor.pushData(enrichedMismatchFields, { log } as any, {
@@ -292,8 +304,10 @@ export const runDataIntegrityCheck = async <
   console.log(`STATS:\n${JSON.stringify(stats, null, 2)}`);
 
   // 8. Push stats to key-value store
+  log.info(`Pushing stats to KeyValueStore`);
   const kvStore = await ActorUtils.openKeyValueStore();
   await kvStore.setValue('DATA_INTEGRITY_STATS', stats);
+  log.info(`Done pushing stats to KeyValueStore`);
 
   // 9. Replace stale cache entries with entries that were found in the scraper run
   if (comparisonDatasetRemoveStaleEntries) {
@@ -303,7 +317,9 @@ export const runDataIntegrityCheck = async <
 
     // NOTE: Not sure if we need to call `Actor.openDataset()` both times, but since we call
     // `Dataset.drop()` I imagine that the dataset instance may become stale after that.
+    log.info(`Updating comparison dataset - Removing ${referenceItemsNotFound.length} stale entries and adding ${numOfItemsToAddToCache} new entries`); // prettier-ignore
     await (await ActorUtils.openDataset(comparisonDatasetIdOrName)).drop();
     await (await ActorUtils.openDataset(comparisonDatasetIdOrName)).pushData(finalCacheItems);
+    log.info(`Done updating comparison dataset`);
   }
 };
