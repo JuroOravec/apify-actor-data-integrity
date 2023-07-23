@@ -32,7 +32,7 @@
       "actorOrTaskId": {
         "title": "Actor or Task ID",
         "type": "string",
-        "description": "Actor or task to call. Allowed formats are `username/actor-name`, `userId/actor-name` or actor ID.",
+        "description": "Actor or task to call. Allowed formats are `username/actor-name`, `userId/actor-name` or actor ID.<br/><br/>\n    Can be omitted if you already have an existing Dataset and you don't need to run an Acor to generate the Dataset.<br/><br/>\n    Either `actorOrTaskId` or `actorOrTaskDatasetIdOrName` MUST be given.",
         "editor": "textfield",
         "example": "username/actor-name",
         "nullable": true
@@ -58,7 +58,7 @@
       "actorOrTaskDatasetIdOrName": {
         "title": "Actor or Task output Dataset ID",
         "type": "string",
-        "description": "ID or name of the dataset that stores entries scraped by the given actor or task.\n    <a href=\"https://docs.apify.com/sdk/python/docs/concepts/storages#opening-named-and-unnamed-storages\">Learn more</a><br/><br/>\n    <strong>NOTE:<strong> Dataset name can only contain letters 'a' through 'z', the digits '0' through '9', and the hyphen ('-') but only in the middle of the string (e.g. 'my-value-1')",
+        "description": "ID or name of the dataset that stores entries scraped by the given actor or task.<br/><br/>\n    Either `actorOrTaskId` or `actorOrTaskDatasetIdOrName` MUST be given.<br/><br/>\n    Default: Run's default dataset.<br/><br/>\n    <strong>NOTE:<strong> Dataset name can only contain letters 'a' through 'z', the digits '0' through '9', and the hyphen ('-') but only in the middle of the string (e.g. 'my-value-1').\n    <a href=\"https://docs.apify.com/sdk/python/docs/concepts/storages#opening-named-and-unnamed-storages\">Learn more</a>",
         "editor": "textfield",
         "example": "mIJVZsRQrDQf4rUAf",
         "pattern": "^[a-zA-Z0-9][a-zA-Z0-9-]*$",

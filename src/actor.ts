@@ -42,7 +42,11 @@ export const run = async (crawlerConfigOverrides?: BasicCrawlerOptions): Promise
       routes: [],
       routeHandlers: {},
     },
-    crawlerConfigOverrides,
+    crawlerConfigOverrides: {
+      // @ts-expect-error proxyConfiguration is intentionally null, otherwise BasicCrawler complains
+      proxyConfiguration: undefined,
+      ...crawlerConfigOverrides,
+    },
     onActorReady: async (actor: ActorContext<BasicCrawlingContext, any, ActorInput>) => {
       await runDataIntegrityCheck(actor);
 

@@ -128,7 +128,7 @@ const customActorInput: Record<keyof CustomActorInput, Field> = {
     type: 'string',
     description: `Actor or task to call. Allowed formats are \`username/actor-name\`, \`userId/actor-name\` or actor ID.${newLine(2)}
     Can be omitted if you already have an existing Dataset and you don't need to run an Acor to generate the Dataset.${newLine(2)}
-    Either \`actorOrTaskId\` or \`actorOrTaskDatasetIdOrName\` MUST be given.`,
+    Either \`actorOrTaskId\` or \`actorOrTaskDatasetIdOrName\` MUST be given.`, // prettier-ignore
     editor: 'textfield',
     example: 'username/actor-name',
     nullable: true,
