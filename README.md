@@ -2,4 +2,4 @@
 
 ===============================
 
-Apify actor for monitoring data changes.
+Apify actor for monitoring changes in datasets of other actors.
